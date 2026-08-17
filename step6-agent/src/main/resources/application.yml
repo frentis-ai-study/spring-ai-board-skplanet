@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: spring-ai-board-step6
+
+  datasource:
+    url: jdbc:h2:file:./data/boarddb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: board
+    password: board
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          # 본 과정 검증 기준 모델입니다.
+          # 2026-08 기준 최신 세대는 gpt-5.6 계열(terra/luna/sol)이며,
+          # 교체 시 Tool Calling 동작을 반드시 재확인하십시오.
+          model: gpt-5.4-mini
+          temperature: 0.0
+
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+logging:
+  level:
+    org.springframework.ai: INFO
+    com.frentis.board: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+board:
+  rag:
+    policies-path: ./data/policies
+    persist-path: ./data/vector-store.json
