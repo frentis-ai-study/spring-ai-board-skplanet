@@ -34,9 +34,26 @@ export OPENAI_API_KEY=sk-...
 # export OPENAI_BASE_URL=https://openrouter.ai/api
 
 cd step0-base && ./gradlew bootRun
+# 브라우저에서 http://localhost:8080 을 엽니다
 # 다음 단계로 넘어갈 때는 Ctrl+C 후
 cd ../step1-chat && ./gradlew bootRun
 ```
+
+## 실습 화면
+
+각 단계마다 `http://localhost:8080`에 확인용 웹 화면이 있습니다. 단계가 올라갈수록 탭이 늘어납니다.
+
+| 단계 | 화면에서 확인할 것 |
+|---|---|
+| step0 | 게시글 목록 조회와 새 글 등록 |
+| step1 | 챗봇에 질문하고 답변 받기 |
+| step2 | 같은 대화 ID로 앞말 기억, 요약을 JSON 구조로 받기 |
+| step3 | 도구 호출로 인기글 조회, 카테고리 자동분류 |
+| step4 | 댓글 등록 시 차단·순화·보류·통과 판정과 감사 로그 |
+| step5 | 운영정책 문서 인덱싱 후 근거 기반 답변 |
+| step6 | 위 기능을 한 체인으로 결합 |
+
+외부 CDN을 쓰지 않으므로 사내망에서도 화면이 그대로 뜹니다.
 
 ## 도메인 모델
 

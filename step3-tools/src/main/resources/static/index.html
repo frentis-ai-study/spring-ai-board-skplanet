@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>게시판 데이터를 읽는 챗봇</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+     background:#f6f7fb;color:#1e293b;line-height:1.6}
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px 60px}
+header{margin-bottom:22px}
+.step{font-size:12px;font-weight:700;letter-spacing:.12em;color:#4f46e5;text-transform:uppercase}
+h1{font-size:24px;margin-top:6px}
+header p{font-size:14px;color:#64748b;margin-top:6px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+nav button{padding:8px 16px;border:1px solid #e2e8f0;background:#fff;border-radius:999px;
+           font-size:14px;font-family:inherit;cursor:pointer;color:#475569}
+nav button.on{background:#4f46e5;border-color:#4f46e5;color:#fff;font-weight:600}
+section{display:none;background:#fff;border:1px solid #e8ecf3;border-radius:16px;padding:22px;margin-bottom:16px}
+section.on{display:block}
+h2{font-size:17px;margin-bottom:4px}
+.hint{font-size:13px;color:#64748b;margin-bottom:14px}
+label{display:block;font-size:13px;font-weight:600;color:#334155;margin:12px 0 6px}
+input,textarea,select{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px 12px;
+      font-size:15px;font-family:inherit;background:#fff}
+textarea{resize:vertical}
+button.go{margin-top:14px;padding:10px 22px;background:#4f46e5;color:#fff;border:0;border-radius:9px;
+      font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
+button.go:disabled{opacity:.5;cursor:default}
+.out{margin-top:16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;
+     white-space:pre-wrap;font-size:14.5px;min-height:44px}
+.out.code{font-family:"JetBrains Mono",Menlo,monospace;font-size:13px}
+.meta{font-size:12px;color:#94a3b8;text-align:right;margin-top:6px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tag{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.PASS{background:#dcfce7;color:#166534}.REWRITE{background:#fef3c7;color:#92400e}
+.HOLD{background:#e0e7ff;color:#3730a3}.BLOCK{background:#fee2e2;color:#991b1b}
+.examples{margin-top:10px;font-size:13px;color:#64748b}
+.examples b{color:#475569}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="step">STEP 3 · 도구 호출 + 자동분류</div>
+      <h1>게시판 데이터를 읽는 챗봇</h1>
+      <p>모델이 필요할 때 게시판 조회 도구를 직접 부릅니다.</p>
+    </header>
+    <nav>
+      <button data-t="chat" class="on" onclick="tab('chat')">챗봇</button>
+      <button data-t="classify" onclick="tab('classify')">자동분류</button>
+      <button data-t="summary" onclick="tab('summary')">구조화 요약</button>
+      <button data-t="board" onclick="tab('board')">게시판</button>
+    </nav>
+    <section id="t-chat" class="on">
+      <h2>게시판 도우미</h2>
+      <p class="hint">ChatClient로 질문을 보내고 답변을 받습니다.</p>
+      <label>대화 ID</label>
+      <input id="conv" value="u-1" />
+      <p class="examples"><b>확인 방법</b> · 같은 대화 ID로 "제 닉네임은 앤디입니다" → "제 닉네임이 뭐였죠?"를 차례로 보내 보십시오.</p>
+      <label>메시지</label>
+      <textarea id="msg" rows="3" placeholder="예: 게시글 제목을 잘 쓰는 방법을 알려주세요">게시글 제목을 잘 쓰는 방법을 알려주세요</textarea>
+      <button class="go" onclick="call('POST','/api/chat',{message:$('msg').value,conversationId:$('conv').value},'chat-out',d=>esc(d.content||JSON.stringify(d)))">보내기</button>
+      <div id="chat-out" class="out"></div>
+      <div id="chat-out-meta" class="meta"></div>
+    </section>
+    <section id="t-classify">
+      <h2>카테고리 자동분류</h2>
+      <p class="hint">제목과 본문을 보고 카테고리와 확신도를 판정합니다.</p>
+      <label>제목</label>
+      <input id="c-title" value="JPA N+1 문제 어떻게 잡으시나요" />
+      <label>본문</label>
+      <textarea id="c-content" rows="3">fetch join으로 해결하다 보니 쿼리가 점점 복잡해집니다. 다른 방법이 있을까요?</textarea>
+      <button class="go" onclick="call('POST','/api/classify',{title:$('c-title').value,content:$('c-content').value},'cls-out')">분류</button>
+      <div id="cls-out" class="out code"></div>
+      <div id="cls-out-meta" class="meta"></div>
+    </section>
+    <section id="t-summary">
+      <h2>게시글 요약을 구조로 받기</h2>
+      <p class="hint">자연어 답변 대신 record로 매핑된 JSON을 받습니다.</p>
+      <label>게시글 본문</label>
+      <textarea id="s-content" rows="4">사내 서비스 12개를 Spring Boot 3.4에서 3.5로 올렸습니다. Jackson 설정과 Actuator 엔드포인트 경로가 걸렸고, 테스트 컨테이너 버전도 함께 올렸습니다.</textarea>
+      <button class="go" onclick="call('POST','/api/summarize',{content:$('s-content').value},'sum-out')">요약</button>
+      <div id="sum-out" class="out code"></div>
+      <div id="sum-out-meta" class="meta"></div>
+    </section>
+    <section id="t-board">
+      <h2>게시글 목록</h2>
+      <p class="hint">step0에서 만든 게시판 REST API를 그대로 씁니다. AI는 아직 없습니다.</p>
+      <button class="go" onclick="loadPosts()">목록 새로고침</button>
+      <div id="posts" class="out"></div>
+      <div id="posts-meta" class="meta"></div>
+      <label>새 글 제목</label>
+      <input id="p-title" value="H2 콘솔 접속이 안 됩니다" />
+      <label>본문</label>
+      <textarea id="p-content" rows="3">application.yml 설정을 넣었는데 404가 납니다.</textarea>
+      <div class="row">
+        <div><label>카테고리</label>
+          <select id="p-cat"><option>질문</option><option>자유</option><option>정보공유</option><option>후기</option><option>공지</option></select></div>
+        <div><label>작성자 회원 ID</label><input id="p-member" value="1" /></div>
+      </div>
+      <button class="go" onclick="createPost()">등록</button>
+      <div id="create" class="out"></div>
+    </section>
+  </div>
+<script>
+
+function $(id){return document.getElementById(id)}
+function tab(name){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===name));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id==='t-'+name));
+}
+async function call(method,url,body,outId,fmt){
+  const out=$(outId); out.textContent='요청 중...';
+  const t0=performance.now();
+  try{
+    const opt={method,headers:{'Content-Type':'application/json'}};
+    if(body!==null) opt.body=JSON.stringify(body);
+    const res=await fetch(url,opt);
+    const text=await res.text();
+    let data; try{data=JSON.parse(text)}catch(e){data=text}
+    out.innerHTML = fmt ? fmt(data,res.status) : (typeof data==='string'?data:JSON.stringify(data,null,2));
+    const ms=Math.round(performance.now()-t0);
+    const m=document.getElementById(outId+'-meta'); if(m) m.textContent=res.status+' · '+ms+'ms';
+  }catch(e){ out.textContent='오류: '+e.message }
+}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+
+async function loadPosts(){
+  await call('GET','/api/posts',null,'posts',d=>{
+    if(!Array.isArray(d)) return JSON.stringify(d);
+    return d.map(p=>'#'+p.id+'  ['+p.category+'] '+esc(p.title)+'   조회 '+p.viewCount+' · '+p.status).join('\n');
+  });
+}
+async function createPost(){
+  await call('POST','/api/posts',{memberId:Number($('p-member').value),title:$('p-title').value,
+    content:$('p-content').value,category:$('p-cat').value},'create',
+    d=>'등록됐습니다. 글 번호 '+d.id+' · 카테고리 '+d.category);
+  loadPosts();
+}
+loadPosts();
+
+</script>
+</body>
+</html>
