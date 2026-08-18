@@ -23,8 +23,8 @@ public class SummaryController {
     private final ChatClient chatClient;
     private final PostRepository posts;
 
-    public SummaryController(ChatClient boardChatClient, PostRepository posts) {
-        this.chatClient = boardChatClient;
+    public SummaryController(ChatClient taskChatClient, PostRepository posts) {
+        this.chatClient = taskChatClient;
         this.posts = posts;
     }
 

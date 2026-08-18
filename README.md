@@ -30,6 +30,9 @@
 ```bash
 export OPENAI_API_KEY=sk-...
 
+# 강사가 OpenRouter 키(sk-or-v1-...)를 배포한 경우에만 아래 한 줄을 더 실행합니다.
+# export OPENAI_BASE_URL=https://openrouter.ai/api
+
 cd step0-base && ./gradlew bootRun
 # 다음 단계로 넘어갈 때는 Ctrl+C 후
 cd ../step1-chat && ./gradlew bootRun
@@ -57,3 +60,19 @@ cd ../step1-chat && ./gradlew bootRun
 
 > Spring AI 2.0.0이 2026-06-12 GA로 나왔습니다(Spring Boot 4 baseline, MCP SDK 2.0, composable tool-calling advisor).
 > 본 실습은 검증된 1.1.7 기준이며, 2.0 변경점은 강의 마지막 블록에서 다룹니다.
+
+## 실행 검증 (2026-08-18)
+
+실제 API 키로 step0부터 step6까지 전 구간을 호출해 확인했습니다.
+
+| 확인 항목 | 결과 |
+|---|---|
+| step0 게시판 CRUD | 조회·작성 정상 |
+| step1 챗봇, 프롬프트 비교 | 정상 |
+| step2 대화 기억, 구조화 요약 | 이름 회상·JSON 변환 정상 |
+| step3 도구 호출, 자동분류 | 인기글 조회·카테고리 판정 정상 |
+| step4 차단·순화·보류, 감사 로그 | 네 판정 모두 정상 |
+| step5 RAG | 운영정책 3종 22청크, 근거 답변 정상 |
+| step6 Advisor 결합 | 도구+RAG 동시 응답 정상 |
+
+검증 중 발견해 고친 것은 `CHANGES.md`에 적었습니다.

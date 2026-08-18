@@ -34,8 +34,8 @@ public class ContentModerationService {
     private final ChatClient chatClient;
     private final ModerationLogRepository logs;
 
-    public ContentModerationService(ChatClient boardChatClient, ModerationLogRepository logs) {
-        this.chatClient = boardChatClient;
+    public ContentModerationService(ChatClient taskChatClient, ModerationLogRepository logs) {
+        this.chatClient = taskChatClient;
         this.logs = logs;
     }
 

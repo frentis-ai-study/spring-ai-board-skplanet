@@ -38,4 +38,18 @@ public class BoardAiConfig {
                 .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .build();
     }
+
+    /**
+     * 단발 작업용 ChatClient.
+     *
+     * 요약·분류·유해성 판정·순화처럼 "한 번 묻고 한 번 받는" 호출에 씁니다.
+     * 대화용(boardChatClient)과 반드시 분리해야 하는 이유는 두 가지입니다.
+     *   1) 대화 메모리 어드바이저는 conversationId를 요구합니다. 단발 호출에는 그 값이 없습니다.
+     *   2) 판정 대상 문장에 민감어가 들어 있으면 안전 필터가 판정 호출 자체를 막아 버립니다.
+     * 판정기는 판정 대상을 그대로 읽어야 하므로 필터를 걸지 않습니다.
+     */
+    @Bean
+    public ChatClient taskChatClient(ChatClient.Builder builder) {
+        return builder.build();
+    }
 }

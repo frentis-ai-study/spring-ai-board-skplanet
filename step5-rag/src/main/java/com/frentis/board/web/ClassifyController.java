@@ -25,8 +25,8 @@ public class ClassifyController {
     private final ChatClient chatClient;
     private final PostRepository posts;
 
-    public ClassifyController(ChatClient boardChatClient, PostRepository posts) {
-        this.chatClient = boardChatClient;
+    public ClassifyController(ChatClient taskChatClient, PostRepository posts) {
+        this.chatClient = taskChatClient;
         this.posts = posts;
     }
 

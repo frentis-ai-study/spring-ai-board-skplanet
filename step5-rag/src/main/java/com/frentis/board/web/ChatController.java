@@ -23,9 +23,11 @@ import java.util.Map;
 public class ChatController {
 
     private final ChatClient chatClient;
+    private final ChatClient taskChatClient;
 
-    public ChatController(ChatClient boardChatClient) {
+    public ChatController(ChatClient boardChatClient, ChatClient taskChatClient) {
         this.chatClient = boardChatClient;
+        this.taskChatClient = taskChatClient;
     }
 
     @PostMapping("/chat")
@@ -41,12 +43,12 @@ public class ChatController {
 
     @PostMapping("/chat-meta")
     public ChatResponse chatWithMeta(@RequestBody ChatRequest request) {
-        return chatClient.prompt().user(request.message()).call().chatResponse();
+        return taskChatClient.prompt().user(request.message()).call().chatResponse();
     }
 
     @PostMapping("/chat-compare")
     public Map<String, String> chatWithCustomSystem(@RequestBody CompareRequest request) {
-        String content = chatClient.prompt()
+        String content = taskChatClient.prompt()
                 .system(request.systemPrompt())
                 .user(request.message())
                 .call()
