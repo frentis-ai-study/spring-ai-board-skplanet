@@ -17,6 +17,12 @@ spring:
       # OpenAI 외의 호환 게이트웨이(OpenRouter 등)를 쓸 때만 OPENAI_BASE_URL을 지정합니다.
       # 예) export OPENAI_BASE_URL=https://openrouter.ai/api  (뒤에 /v1은 붙이지 않습니다)
       base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      embedding:
+        options:
+          # 지정하지 않으면 Spring AI 기본값인 text-embedding-ada-002가 쓰입니다.
+          # 한국어 검색 품질과 비용 모두 3-small이 낫고, RAG 임계값도 이 모델 기준으로 맞췄습니다.
+          model: text-embedding-3-small
+
       chat:
         options:
           # gpt-5.6 세대의 경량 모델입니다. 컨텍스트 105만 토큰,
